@@ -7,13 +7,12 @@ USER $NB_UID
 
 # setup Vertica client
 RUN pip install --upgrade setuptools pip
-RUN pip install vertica-python
 RUN pip install plotly # Plotly graphing library
 RUN pip install dash # The core dash backend
 RUN pip install dash-renderer # The dash front-end
 RUN pip install dash-html-components # HTML components
 RUN pip install dash-core-components # Supercharged components
-RUN numpy pandas psycopg2-binary pyarrow sqlalchemy sqlalchemy-vertica-python # packages for SQLAlchemy
+RUN pip install vertica-python numpy pandas psycopg2-binary pyarrow sqlalchemy sqlalchemy-vertica-python # packages for SQLAlchemy
 # add Vertica-ML-Python
 RUN mkdir -p /home/jovyan/vertica-example
 ADD example /home/jovyan/vertica-example/

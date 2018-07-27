@@ -109,3 +109,5 @@ venv.bak/
 *.zip
 *.gz
 *.tgz
+*.filepart
+
