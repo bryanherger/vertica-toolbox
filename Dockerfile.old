@@ -1,0 +1,114 @@
+# derived mainly from https://github.com/jupyter/docker-stacks/tree/master/scipy-notebook
+FROM jupyter/scipy-notebook
+
+#original LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"
+LABEL maintainer="Bryan Herger <bherger@users.sf.net>"
+
+USER root
+
+# pre-requisites
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    fonts-dejavu \
+    tzdata \
+    less \
+    gfortran \
+    gcc && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# libav-tools for matplotlib anim
+#RUN apt-get update && \
+#    apt-get install -y --no-install-recommends libav-tools && \
+#    apt-get clean && \
+#    rm -rf /var/lib/apt/lists/*
+# UPDATE: apparently we need ffmpeg now
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ffmpeg && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+USER $NB_UID
+
+# Install Python 3 packages
+# Remove pyqt and qt pulled in for matplotlib since we're only ever going to
+# use notebook-friendly backends in these images
+RUN conda install --quiet --yes \
+    'nomkl' \
+    'ipywidgets=7.1*' \
+    'pandas=0.19*' \
+    'numexpr=2.6*' \
+    'matplotlib=2.0*' \
+    'scipy=0.19*' \
+    'seaborn=0.7*' \
+    'scikit-learn=0.18*' \
+    'scikit-image=0.12*' \
+    'sympy=1.0*' \
+    'cython=0.25*' \
+    'patsy=0.4*' \
+    'statsmodels=0.8*' \
+    'cloudpickle=0.2*' \
+    'dill=0.2*' \
+    'numba=0.31*' \
+    'bokeh=0.12*' \
+    'sqlalchemy=1.1*' \
+    'hdf5=1.8.17' \
+    'h5py=2.6*' \
+    'vincent=0.4.*' \
+    'beautifulsoup4=4.5.*' \
+    'protobuf=3.*' \
+    'xlrd'  && \
+    conda remove --quiet --yes --force qt pyqt && \
+    conda clean -tipsy && \
+    # Activate ipywidgets extension in the environment that runs the notebook server
+    jupyter nbextension enable --py widgetsnbextension --sys-prefix && \
+    # Also activate ipywidgets extension for JupyterLab
+    # jupyter labextension install @jupyter-widgets/jupyterlab-manager@0.33 && \
+    npm cache clean && \
+    rm -rf $CONDA_DIR/share/jupyter/lab/staging && \
+    rm -rf /home/$NB_USER/.cache/yarn && \
+    rm -rf /home/$NB_USER/.node-gyp && \
+    fix-permissions $CONDA_DIR && \
+    fix-permissions /home/$NB_USER
+
+# Install facets which does not have a pip or conda package at the moment
+#RUN cd /tmp && \
+#    git clone https://github.com/PAIR-code/facets.git && \
+#    cd facets && \
+#    jupyter nbextension install facets-dist/ --sys-prefix && \
+#    rm -rf facets && \
+#    fix-permissions $CONDA_DIR && \
+#    fix-permissions /home/$NB_USER
+
+# Import matplotlib the first time to build the font cache.
+ENV XDG_CACHE_HOME /home/$NB_USER/.cache/
+# RUN MPLBACKEND=Agg python -c "import matplotlib.pyplot" && fix-permissions /home/$NB_USER
+RUN MPLBACKEND=Agg python -c "import matplotlib.pyplot"
+
+USER $NB_UID
+
+# setup Vertica client
+RUN conda install --yes vertica-python
+RUN pip install plotly # Plotly graphing library
+RUN pip install dash # The core dash backend
+RUN pip install dash-renderer # The dash front-end
+RUN pip install dash-html-components # HTML components
+RUN pip install dash-core-components # Supercharged components
+RUN mkdir -p /home/jovyan/vertica-example
+ADD example /home/jovyan/vertica-example/
+ADD README.md /home/jovyan/
+# RUN mkdir -p /home/jovyan/datasets
+# ADD datasets /home/jovyan/datasets/
+RUN mkdir -p /opt/conda/lib/python3.6/site-packages/vertica_ml_python
+ADD vertica_ml_python /opt/conda/lib/python3.6/site-packages/vertica_ml_python/
+RUN jupyter notebook --generate-config
+RUN echo c.NotebookApp.password = u\'sha1:5f0645e79ad1:0cb5b7f88fd7fda0ed96691c1336d0d13b2852a4\' >> /home/jovyan/.jupyter/jupyter_notebook_config.py
+
+# setup Superset
+RUN pip install superset
+RUN fabmanager create-admin --app superset
+RUN superset db upgrade
+RUN superset load_examples
+RUN superset init
+
+RUN superset runserver -d -p 18888
+
