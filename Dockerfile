@@ -33,8 +33,6 @@ RUN apt-get update -y && apt-get install -y build-essential libssl-dev libffi-de
 RUN apt-get install -y vim less postgresql-client redis-tools
 # install odb and dependencies (unixODBC and drivers and security libs for Vertica)
 RUN apt-get install -y unixodbc unixodbc-bin unixodbc-dev odbc-postgresql libssl1.0.0 libssl1.0-dev
-# set the root password so we can ssh in
-RUN echo changeme | passwd --stdin root
 # done with root stuff
 USER $NB_UID
 # install
@@ -44,6 +42,7 @@ RUN superset db upgrade
 RUN superset load_examples
 RUN superset init
 
+# export Jupyter and Superset listening ports
 EXPOSE 8088
 EXPOSE 8888
 
