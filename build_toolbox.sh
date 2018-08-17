@@ -1,3 +1,3 @@
 #!/bin/bash
-sudo docker build -t vertica-toolbox .
+sudo docker build -t bryanherger/vertica-toolbox:latest .
 

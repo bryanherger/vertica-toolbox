@@ -31,11 +31,6 @@ RUN echo c.NotebookApp.password = u\'sha1:5f0645e79ad1:0cb5b7f88fd7fda0ed96691c1
 USER root
 RUN apt-get update -y && apt-get install -y build-essential libssl-dev libffi-dev python3-dev libsasl2-dev libldap2-dev
 RUN apt-get install -y vim less postgresql-client redis-tools
-# install odb and dependencies (unixODBC and drivers and security libs for Vertica)
-RUN apt-get install -y unixodbc unixodbc-bin unixodbc-dev odbc-postgresql libssl1.0.0 libssl1.0-dev
-# set the root password so we can ssh in
-RUN echo changeme | passwd --stdin root
-# done with root stuff
 USER $NB_UID
 # install
 RUN pip install superset
@@ -49,9 +44,5 @@ EXPOSE 8888
 
 # this probably needs to be in the launch script
 #RUN superset runserver -d
-# (moved to quickstart.sh)
 COPY quickstart.sh /home/jovyan/quickstart.sh
-# install odb and dependencies (unixODBC and drivers)
-COPY odb64luo /home/jovyan
-
 
