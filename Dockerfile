@@ -12,7 +12,12 @@ RUN pip install dash # The core dash backend
 RUN pip install dash-renderer # The dash front-end
 RUN pip install dash-html-components # HTML components
 RUN pip install dash-core-components # Supercharged components
-RUN pip install vertica-python numpy pandas psycopg2-binary pyarrow sqlalchemy sqlalchemy-vertica-python # packages for SQLAlchemy
+# install custom build of vertica-python
+RUN pip install --pre pytz python-dateutil
+RUN cd /tmp && git clone https://github.com/bryanherger/vertica-python && cd vertica-python && python3 setup.py install
+# uncomment when the patch is tested and accepted
+# RUN pip install vertica-python
+RUN pip install numpy pandas psycopg2-binary pyarrow sqlalchemy sqlalchemy-vertica-python ipython-sql vertica-sqlalchemy # packages for SQL Magic and SQLAlchemy
 # add Vertica-ML-Python
 RUN mkdir -p /home/jovyan/vertica-example
 ADD example /home/jovyan/vertica-example/
@@ -48,7 +53,6 @@ RUN superset db upgrade
 RUN superset load_examples
 RUN superset init
 
-# export Jupyter and Superset listening ports
 EXPOSE 8088
 EXPOSE 8888
 
