@@ -46,8 +46,8 @@ COPY odbcinst.ini /etc/odbcinst.ini
 RUN pip install pyodbc
 # done with root stuff
 USER $NB_UID
-# install
-RUN pip install superset
+# install Superset and console-log dependency (probably should file a bug for that)
+RUN pip install superset console-log
 # RUN fabmanager create-admin --app superset
 RUN superset db upgrade
 RUN superset load_examples
