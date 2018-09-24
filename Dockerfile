@@ -39,7 +39,7 @@ RUN apt-get install -y vim less postgresql-client redis-tools
 # install odb and dependencies (unixODBC and drivers and security libs for Vertica)
 RUN apt-get install -y unixodbc unixodbc-bin unixodbc-dev odbc-postgresql libssl1.0.0 libssl1.0-dev
 # get Vertica client drivers
-RUN cd / && wget --no-check-certificate https://www.vertica.com/client_drivers/9.1.x/9.1.1-0/vertica-client-9.1.1-0.x86_64.tar.gz && rm vertica*gz
+RUN cd / && wget --no-check-certificate https://www.vertica.com/client_drivers/9.1.x/9.1.1-0/vertica-client-9.1.1-0.x86_64.tar.gz && tar xzvf vertica*gz && rm vertica*gz
 # copy odbcinst.ini
 COPY odbcinst.ini /etc/odbcinst.ini
 # install pyodbc
