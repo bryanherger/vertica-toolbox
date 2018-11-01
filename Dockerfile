@@ -12,6 +12,7 @@ RUN pip install dash # The core dash backend
 RUN pip install dash-renderer # The dash front-end
 RUN pip install dash-html-components # HTML components
 RUN pip install dash-core-components # Supercharged components
+RUN pip install xgboost # more libraries not in the base install
 # install custom build of vertica-python
 RUN pip install --pre pytz python-dateutil
 RUN cd /tmp && git clone https://github.com/bryanherger/vertica-python && cd vertica-python && python3 setup.py install
