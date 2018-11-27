@@ -30,7 +30,7 @@ ADD vertica_ml_python /opt/conda/lib/python3.6/site-packages/vertica_ml_python/
 
 # set "changeme" as Jupyter password (avoids having to collect the token)
 # RUN jupyter notebook --generate-config
-RUN echo c.NotebookApp.password = u\'sha1:5f0645e79ad1:0cb5b7f88fd7fda0ed96691c1336d0d13b2852a4\' >> /home/jovyan/.jupyter/jupyter_notebook_config.py
+RUN echo c.NotebookApp.password = u\'sha1:033bf8c51e01:da1926b2dea2cd531e2e43d98b415970c4104894\' >> /home/jovyan/.jupyter/jupyter_notebook_config.py
 
 # setup Superset and client drivers
 # prerequisites
@@ -48,16 +48,29 @@ RUN pip install pyodbc
 # add gosu and sample odbc.ini
 RUN wget -O /usr/bin/gosu https://github.com/tianon/gosu/releases/download/1.1/gosu && chmod +sx /usr/bin/gosu
 COPY odbc.ini /etc/odbc.ini
+# install yarnpkg https://yarnpkg.com/en/docs/install#debian-stable
+RUN apt-get install -y gnupg2
+RUN cd /tmp && wget -O /tmp/yarn.key https://dl.yarnpkg.com/debian/pubkey.gpg && apt-key add /tmp/yarn.key && echo "deb https://dl.yarnpkg.com/debian/ stable main" >> /etc/apt/sources.list.d/yarn.list
+RUN apt-get update && apt-get install --no-install-recommends yarn
 # done with root stuff
 USER $NB_UID
 # install Superset and console-log dependency (probably should file a bug for that)
 RUN pip install superset console-log
+# assuming $SUPERSET_HOME as the root of the repo
+#RUN pip install console-log
+#RUN cd /home/jovyan && SUPERSET_HOME=/home/jovyan/incubator-superset && \
+#git clone https://github.com/apache/incubator-superset.git && \
+#cd $SUPERSET_HOME/superset/assets && \
+#yarn && \
+#yarn run build && \
+#cd $SUPERSET_HOME && \
+#python setup.py install
 # RUN fabmanager create-admin --app superset
-RUN superset db upgrade
-RUN superset load_examples
-RUN superset init
+#RUN superset db upgrade
+#RUN superset load_examples
+#RUN superset init
 
-EXPOSE 8088
+#EXPOSE 8088
 EXPOSE 8888
 
 # this probably needs to be in the launch script
