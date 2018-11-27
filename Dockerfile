@@ -28,6 +28,9 @@ ADD README.md /home/jovyan/
 RUN mkdir -p /opt/conda/lib/python3.6/site-packages/vertica_ml_python
 ADD vertica_ml_python /opt/conda/lib/python3.6/site-packages/vertica_ml_python/
 
+#patch a sqlalchemy-vertica issue (yes, I KNOW I should submit a pull request)
+COPY base.py /opt/conda/lib/python3.6/site-packages/sqlalchemy_vertica/base.py
+
 # set "changeme" as Jupyter password (avoids having to collect the token)
 # RUN jupyter notebook --generate-config
 RUN echo c.NotebookApp.password = u\'sha1:033bf8c51e01:da1926b2dea2cd531e2e43d98b415970c4104894\' >> /home/jovyan/.jupyter/jupyter_notebook_config.py
